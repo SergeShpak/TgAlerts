@@ -1,53 +1,58 @@
 package types
 
+type Response struct {
+	OK     bool        `json:"ok,omitempty"`
+	Result interface{} `json:"result,omitempty"`
+}
+
 type Update struct {
 	UpdateID int32 `json:"update_id,omitempty"`
-	Message  Message
+	Message  *Message
 }
 
 type Message struct {
-	MessageID             int32 `json:"message_id,omitempty"`
-	From                  *User
-	Date                  int32
-	Chat                  *Chat
-	ForwardFrom           *User
-	ForwardFromChat       *Chat
-	ForwardFromMessageID  int32
-	ForwardSignature      string
-	ForwardDate           int32
-	ReplyToMessage        *Message
-	EditDate              int32
-	MediaGroupID          string
-	AuthorSignature       string
-	Text                  string
-	Entities              []MessageEntity
-	CaptionEntities       []MessageEntity
-	Audio                 *Audio
-	Document              *Document
-	Game                  *Game
-	Photo                 []PhotoSize
-	Sticker               *Sticker
-	Video                 *Video
-	Voice                 *Voice
-	VideoNote             *VideoNote
-	Caption               string
-	Contact               *Contact
-	Location              *Location
-	Venue                 *Venue
-	NewChatMembers        []User
-	LeftCharMember        *User
-	NewChatTitle          string
-	NewChatPhoto          []PhotoSize
-	DeleteChatPhoto       bool
-	GroupChatCreated      bool
-	SupergroupChatCreated bool
-	ChannelChatCreated    bool
-	MigrateToChatID       int32
-	MigrateFromChatID     int32
-	PinnedMessage         *Message
-	Invoice               *Invoice
-	SuccessfulPayment     *SuccessfulPayment
-	ConnectedWebsite      string
+	MessageID             int32              `json:"message_id,omitempty"`
+	From                  *User              `json:"from,omitempty"`
+	Date                  int32              `json:"date,omitempty"`
+	Chat                  *Chat              `json:"from,omitempty"`
+	ForwardFrom           *User              `json:",omitempty"`
+	ForwardFromChat       *Chat              `json:",omitempty"`
+	ForwardFromMessageID  int32              `json:",omitempty"`
+	ForwardSignature      string             `json:",omitempty"`
+	ForwardDate           int32              `json:",omitempty"`
+	ReplyToMessage        *Message           `json:",omitempty"`
+	EditDate              int32              `json:",omitempty"`
+	MediaGroupID          string             `json:",omitempty"`
+	AuthorSignature       string             `json:",omitempty"`
+	Text                  string             `json:"text,omitempty"`
+	Entities              []MessageEntity    `json:",omitempty"`
+	CaptionEntities       []MessageEntity    `json:",omitempty"`
+	Audio                 *Audio             `json:",omitempty"`
+	Document              *Document          `json:",omitempty"`
+	Game                  *Game              `json:",omitempty"`
+	Photo                 []PhotoSize        `json:",omitempty"`
+	Sticker               *Sticker           `json:",omitempty"`
+	Video                 *Video             `json:",omitempty"`
+	Voice                 *Voice             `json:",omitempty"`
+	VideoNote             *VideoNote         `json:",omitempty"`
+	Caption               string             `json:",omitempty"`
+	Contact               *Contact           `json:",omitempty"`
+	Location              *Location          `json:",omitempty"`
+	Venue                 *Venue             `json:",omitempty"`
+	NewChatMembers        []User             `json:",omitempty"`
+	LeftCharMember        *User              `json:",omitempty"`
+	NewChatTitle          string             `json:",omitempty"`
+	NewChatPhoto          []PhotoSize        `json:",omitempty"`
+	DeleteChatPhoto       bool               `json:",omitempty"`
+	GroupChatCreated      bool               `json:",omitempty"`
+	SupergroupChatCreated bool               `json:",omitempty"`
+	ChannelChatCreated    bool               `json:",omitempty"`
+	MigrateToChatID       int32              `json:",omitempty"`
+	MigrateFromChatID     int32              `json:",omitempty"`
+	PinnedMessage         *Message           `json:",omitempty"`
+	Invoice               *Invoice           `json:",omitempty"`
+	SuccessfulPayment     *SuccessfulPayment `json:",omitempty"`
+	ConnectedWebsite      string             `json:",omitempty"`
 }
 
 type User struct {

@@ -1,11 +1,17 @@
 package main
 
 import (
+	"log"
+	"net/url"
+	"strconv"
+	"time"
+
 	"github.com/SergeyShpak/TgAlerts/types"
 )
 
 type BotAPI struct {
-	Client *Client
+	Client            *Client
+	updatesBufferSize int
 }
 
 func NewBotAPI(token string) (*BotAPI, error) {
@@ -14,22 +20,23 @@ func NewBotAPI(token string) (*BotAPI, error) {
 		return nil, err
 	}
 	botAPI := &BotAPI{
-		Client: client,
+		Client:            client,
+		updatesBufferSize: 100,
 	}
 	return botAPI, nil
 }
 
 func (b *BotAPI) GetMe() error {
-	if err := b.Client.DoRequest("GET", "getMe"); err != nil {
+	if err := b.Client.DoRequest("GET", "getMe", nil, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
 type GetUpdatesParams struct {
-	Offset         int
-	Limit          int
-	Timeout        int
+	Offset         int32
+	Limit          int32
+	Timeout        int32
 	AllowedUpdates []string
 }
 
@@ -49,17 +56,47 @@ func defaultifyGetUpdatesParams(params *GetUpdatesParams) *GetUpdatesParams {
 	return params
 }
 
-func (b *BotAPI) GetUpdates(params *GetUpdatesParams) error {
+func (b *BotAPI) GetUpdates(params *GetUpdatesParams) ([]types.Update, error) {
 	params = defaultifyGetUpdatesParams(params)
-	err := b.Client.DoRequest("GET", "getUpdates")
-	if err != nil {
-		return err
+	v := url.Values{}
+	if params.Offset != 0 {
+		v.Add("offset", strconv.Itoa(int(params.Offset)))
 	}
-	return nil
+	if params.Limit > 0 {
+		v.Add("limit", strconv.Itoa(int(params.Limit)))
+	}
+	if params.Timeout > 0 {
+		v.Add("timeout", strconv.Itoa(int(params.Timeout)))
+	}
+	var updates []types.Update
+	err := b.Client.DoRequest("GET", "getUpdates", v, &updates)
+	if err != nil {
+		return nil, err
+	}
+	return updates, nil
 }
 
 type UpdatesChannel <-chan types.Update
 
-func (b *BotAPI) GetUpdatesChan(params *GetUpdatesParams) UpdatesChannel {
-	return nil
+func (b *BotAPI) GetUpdatesChan(params *GetUpdatesParams) (UpdatesChannel, error) {
+	ch := make(chan types.Update, b.updatesBufferSize)
+
+	params = defaultifyGetUpdatesParams(params)
+	go func() {
+		for {
+			updates, err := b.GetUpdates(params)
+			if err != nil {
+				log.Println("failed to get updates: ", err)
+				time.Sleep(time.Second * 2)
+				continue
+			}
+			for _, update := range updates {
+				if update.UpdateID >= params.Offset {
+					params.Offset = update.UpdateID + 1
+				}
+				ch <- update
+			}
+		}
+	}()
+	return ch, nil
 }

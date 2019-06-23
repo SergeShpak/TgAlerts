@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 )
 
 func main() {
@@ -16,6 +17,13 @@ func main() {
 	}
 	if err := botAPI.GetMe(); err != nil {
 		panic(err)
+	}
+	updates, err := botAPI.GetUpdatesChan(nil)
+	if err != nil {
+		panic(err)
+	}
+	for update := range updates {
+		log.Println(update.Message.Text)
 	}
 }
 

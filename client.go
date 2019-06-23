@@ -1,8 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
+
+	"github.com/SergeyShpak/TgAlerts/types"
 )
 
 const TelegramAPIAddr = "https://api.telegram.org/bot"
@@ -20,8 +25,9 @@ func NewClient(token string) (*Client, error) {
 	return client, nil
 }
 
-func (c *Client) DoRequest(method string, endpoint string) error {
+func (c *Client) DoRequest(method string, endpoint string, params url.Values, response interface{}) error {
 	r, err := http.NewRequest(method, c.composeURL(endpoint), nil)
+	r.URL.RawQuery = params.Encode()
 	if err != nil {
 		return err
 	}
@@ -29,7 +35,20 @@ func (c *Client) DoRequest(method string, endpoint string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(resp)
+	defer resp.Body.Close()
+	if response == nil {
+		return err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Println("body: ", string(body))
+	var responseWrapper types.Response
+	responseWrapper.Result = response
+	if err := json.Unmarshal(body, &responseWrapper); err != nil {
+		return err
+	}
 	return nil
 }
 
